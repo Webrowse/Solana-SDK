@@ -1,0 +1,14 @@
+Cargo new solana_wallet
+
+cd solana_wallet
+
+edit Cargo.toml
+[dependencies]
+solana-sdk = "1.16"
+solana-client = "1.16"
+solana-cli-config = "1.16"
+serde_json = "1.0"
+
+
+cargo build
+
