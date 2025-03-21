@@ -1,6 +1,7 @@
 use solana_client::rpc_client::RpcClient;
 use solana_sdk::signature::{Keypair, Signer};
-use std::fs;
+use solana_sdk::pubkey::Pubkey;
+use std::{env, fs, process};
 
 fn main() {
     let rpc_url = "https://api.devnet.solana.com"; // Connect to Devnet
@@ -10,15 +11,16 @@ fn main() {
     let keypair = load_or_create_keypair("wallet.json");
     let public_key = keypair.pubkey();
 
-    println!("Wallet Address: {}", public_key);
-
-    // Fetch and display balance
-    match client.get_balance(&public_key) {
-        Ok(balance) => println!("Wallet Balance: {} SOL", balance as f64 / 1_000_000_000.0),
-        Err(e) => eprintln!("Error fetching balance: {:?}", e),
+    // Check command-line arguments
+    let args: Vec<String> = env::args().collect();
+    if args.len() > 1 && args[1] == "airdrop" {
+        airdrop_sol(&client, &public_key);
+    } else {
+        check_balance(&client, &public_key);
     }
 }
 
+// Function to load or create a wallet
 fn load_or_create_keypair(path: &str) -> Keypair {
     match fs::read_to_string(path) {
         Ok(data) => {
@@ -33,5 +35,25 @@ fn load_or_create_keypair(path: &str) -> Keypair {
             println!("✅ New wallet saved to '{}'", path);
             new_keypair
         }
+    }
+}
+
+// Function to fetch wallet balance
+fn check_balance(client: &RpcClient, public_key: &Pubkey) {
+    match client.get_balance(public_key) {
+        Ok(balance) => println!("💰 Wallet Balance: {} SOL", balance as f64 / 1_000_000_000.0),
+        Err(e) => eprintln!("❌ Error fetching balance: {:?}", e),
+    }
+}
+
+// Function to request 1 SOL airdrop
+fn airdrop_sol(client: &RpcClient, public_key: &Pubkey) {
+    println!("💸 Requesting 1 SOL airdrop...");
+    match client.request_airdrop(public_key, 1_000_000_000) {
+        Ok(tx_signature) => {
+            println!("✅ Airdrop successful! Transaction: {}", tx_signature);
+            check_balance(client, public_key);
+        }
+        Err(e) => eprintln!("❌ Airdrop failed: {:?}", e),
     }
 }
