@@ -10,11 +10,12 @@ fn main() {
     // Load or create keypair
     let keypair = load_or_create_keypair("wallet.json");
     let public_key = keypair.pubkey();
+    println!("Public Key: {}", public_key);
 
     // Check command-line arguments
     let args: Vec<String> = env::args().collect();
     if args.len() > 1 && args[1] == "airdrop" {
-        airdrop_sol(&client, &public_key);
+        airdrop(&client, &public_key);
     } else {
         check_balance(&client, &public_key);
     }
@@ -47,7 +48,7 @@ fn check_balance(client: &RpcClient, public_key: &Pubkey) {
 }
 
 // Function to request 1 SOL airdrop
-fn airdrop_sol(client: &RpcClient, public_key: &Pubkey) {
+fn airdrop(client: &RpcClient, public_key: &Pubkey) {
     println!("💸 Requesting 1 SOL airdrop...");
     match client.request_airdrop(public_key, 1_000_000_000) {
         Ok(tx_signature) => {
