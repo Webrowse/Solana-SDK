@@ -1,7 +1,7 @@
 use solana_client::rpc_client::RpcClient;
 use solana_sdk::signature::{Keypair, Signer};
 use solana_sdk::pubkey::Pubkey;
-use std::{env, fs, process};
+use std::{env, fs};
 
 fn main() {
     let rpc_url = "https://api.devnet.solana.com"; // Connect to Devnet

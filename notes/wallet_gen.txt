@@ -1,0 +1,10 @@
+📝 Wallet Generation (Quick Notes)
+1️⃣ Try to load wallet.json (load_keypair(path))
+
+If file exists → Load keypair
+If file missing → Call generate_and_save_keypair(path)
+2️⃣ Generate new keypair (Keypair::new())
+
+3️⃣ Save keypair to wallet.json (fs::write(path, keypair.to_base58_string()))
+
+🔹 If wallet.json is missing, a new wallet is automatically created and saved.

@@ -1,0 +1,14 @@
+📝 Check Balance (Quick Notes)
+1️⃣ Load or Generate Keypair (load_keypair(path))
+
+Reads keypair from wallet.json
+If missing, generates a new one (generate_and_save_keypair(path))
+2️⃣ Extract Public Key (keypair.pubkey())
+
+3️⃣ Connect to Solana Devnet (RpcClient::new(rpc_url))
+
+4️⃣ Fetch Balance (client.get_balance(&public_key))
+
+Converts from lamports to SOL (balance / 1_000_000_000.0)
+Prints the balance or error message.
+🔹 If no wallet exists, a new one is created before checking balance.
