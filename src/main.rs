@@ -1,6 +1,9 @@
 use solana_client::rpc_client::RpcClient;
 use solana_sdk::signature::{Keypair, Signer};
 use solana_sdk::pubkey::Pubkey;
+use solana_sdk::system_transaction;
+use solana_sdk::transaction::Transaction;
+use solana_sdk::message::Message;
 use std::{env, fs};
 
 fn main() {
@@ -57,4 +60,13 @@ fn airdrop(client: &RpcClient, public_key: &Pubkey) {
         }
         Err(e) => eprintln!("❌ Airdrop failed: {:?}", e),
     }
+}
+
+fn send_sol(recipient:&str, amount_sol: f64) {
+    let rpc_url: &str= "https://api.devnet.solana.com";
+    let client = RpcClient::new(rpc_url.to_string());
+
+    //
+    let sender = load_or_create_keypair("wallet.json");
+    let sender_pubkey = sender
 }
