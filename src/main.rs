@@ -1,7 +1,7 @@
 use solana_client::rpc_client::RpcClient;
 use solana_sdk::signature::{Keypair, Signer};
 use solana_sdk::pubkey::Pubkey;
-use solana_sdk::system_transaction;
+use solana_sdk::system_instruction;
 use solana_sdk::transaction::Transaction;
 use solana_sdk::message::Message;
 use std::{env, fs};
@@ -17,8 +17,20 @@ fn main() {
 
     // Check command-line arguments
     let args: Vec<String> = env::args().collect();
-    if args.len() > 1 && args[1] == "airdrop" {
-        airdrop(&client, &public_key);
+    if args.len() > 1 {
+        match args[1].as_str() {
+            "airdrop" => airdrop(&client, &public_key),
+            "send" => {
+                if args.len() < 4 {
+                    eprintln!("Usage: cargo run send <recipient_pubkey> <amount_in_sol>");
+                    return;
+                }
+                let recipient = args[2].clone();
+                let amount: f64 = args[3].parse().expect("Invalid amount");
+                send_sol(&client, &keypair, &recipient, amount);
+            }
+            _ => eprintln!("Unknown command"),
+        }
     } else {
         check_balance(&client, &public_key);
     }
@@ -62,11 +74,26 @@ fn airdrop(client: &RpcClient, public_key: &Pubkey) {
     }
 }
 
-fn send_sol(recipient:&str, amount_sol: f64) {
-    let rpc_url: &str= "https://api.devnet.solana.com";
-    let client = RpcClient::new(rpc_url.to_string());
+// Function to send SOL
 
-    //
-    let sender = load_or_create_keypair("wallet.json");
-    let sender_pubkey = sender
+fn send_sol(client: &RpcClient, sender: &Keypair, recipient: &str, amount_sol: f64) {
+    let sender_pubkey = sender.pubkey();
+    let recipient_pubkey: Pubkey = recipient.parse().expect("Invalid recipient public key");
+
+    let lamports = (amount_sol * 1_000_000_000.0) as u64;
+
+    let instruction = system_instruction::transfer(&sender_pubkey, &recipient_pubkey, lamports);
+    let recent_blockhash = client.get_latest_blockhash().expect("Failed to get blockhash");
+
+    let transaction = Transaction::new_signed_with_payer(
+        &[instruction.clone()], // Clone to avoid move
+        Some(&sender_pubkey),
+        &[sender],
+        recent_blockhash,
+    );
+
+    match client.send_and_confirm_transaction(&transaction) {
+        Ok(signature) => println!("✅ Transaction successful! Signature: {}", signature),
+        Err(e) => eprintln!("❌ Transaction failed: {:?}", e),
+    }
 }
